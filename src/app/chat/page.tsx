@@ -4,9 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import ContactModal from "@/components/ContactModal";
 
 const GOLD = "#C5A55A";
-const NAVY = "#1B3A5C";
+const MAX_REPLY_CHARS = 300;
+const TYPING_SPEED_MS = 35;
+const TYPING_CHUNK = 2;
 
 const SCENARIO_CARDS = [
   {
@@ -35,6 +38,12 @@ const SCENARIO_CARDS = [
   },
 ] as const;
 
+const CONTACT_TIPS = [
+  "💡 想要更深入的定制化文化培训？联系悦出海工作室 →",
+  "📞 需要一对一的中东商务咨询？预约石悦华老师 →",
+  "🎓 即将开课：中东商务文化实战训练营，了解详情 →",
+] as const;
+
 type Message = { role: "user" | "assistant"; content: string };
 
 export default function ChatPage() {
@@ -42,18 +51,45 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showContact, setShowContact] = useState(false);
+  const [displayedChars, setDisplayedChars] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const lastAssistantContent =
+    messages.filter((m) => m.role === "assistant").pop()?.content ?? "";
+  const lastAssistantCapped = lastAssistantContent.slice(0, MAX_REPLY_CHARS);
+  const isLastAssistantStreaming =
+    messages.length > 0 &&
+    messages[messages.length - 1].role === "assistant" &&
+    (loading || displayedChars < lastAssistantCapped.length);
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
+  }, [messages, displayedChars]);
+
+  useEffect(() => {
+    if (!isLastAssistantStreaming || displayedChars >= lastAssistantCapped.length) return;
+    const target = lastAssistantCapped.length;
+    const timer = setInterval(() => {
+      setDisplayedChars((prev) => {
+        const next = Math.min(prev + TYPING_CHUNK, target);
+        return next;
+      });
+    }, TYPING_SPEED_MS);
+    return () => clearInterval(timer);
+  }, [lastAssistantCapped.length, isLastAssistantStreaming, displayedChars]);
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
     setError(null);
+    setDisplayedChars(0);
     const userMessage: Message = { role: "user", content: trimmed };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -85,14 +121,15 @@ export default function ChatPage() {
         const { done, value } = await reader.read();
         if (done) break;
         full += decoder.decode(value, { stream: true });
+        const capped = full.slice(0, MAX_REPLY_CHARS);
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
-          if (last?.role === "assistant")
-            next[next.length - 1] = { ...last, content: full };
+          if (last?.role === "assistant") next[next.length - 1] = { ...last, content: capped };
           return next;
         });
       }
+      setDisplayedChars(Math.min(full.length, MAX_REPLY_CHARS));
     } catch (err) {
       setError(err instanceof Error ? err.message : "对话失败");
       setMessages((prev) => prev.slice(0, -1));
@@ -111,13 +148,23 @@ export default function ChatPage() {
     inputRef.current?.focus();
   }
 
+  function getTipForAssistantIndex(assistantIndex: number): string {
+    return CONTACT_TIPS[assistantIndex % CONTACT_TIPS.length];
+  }
+
+  let assistantCount = 0;
+
   return (
-    <div className="flex min-h-screen flex-col bg-white text-[#1B3A5C]">
+    <div className="flex h-screen flex-col overflow-hidden bg-white text-[#1B3A5C]">
       <Nav active="chat" />
 
-      <main className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-          <div className="mx-auto max-w-3xl">
+      <main className="flex min-h-0 flex-1 flex-col">
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto px-4 py-6 sm:px-6"
+          style={{ height: "calc(100vh - 200px)", overflowY: "auto" }}
+        >
+          <div className="mx-auto max-w-3xl pb-40">
             {messages.length === 0 && (
               <div className="hero-with-pattern rounded-2xl px-6 py-12 text-center sm:px-10 sm:py-16">
                 <p
@@ -151,50 +198,82 @@ export default function ChatPage() {
               </div>
             )}
 
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`mb-4 flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {m.role === "user" ? (
-                  <div
-                    className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-white"
-                    style={{
-                      background: "linear-gradient(135deg, #1B3A5C, #162F4A)",
-                    }}
-                  >
-                    <p className="whitespace-pre-wrap text-sm">{m.content}</p>
-                  </div>
-                ) : (
-                  <div className="flex max-w-[85%] gap-2 sm:gap-3">
+            {messages.map((m, i) => {
+              if (m.role === "assistant") assistantCount += 1;
+              const isLastAssistant =
+                m.role === "assistant" && i === messages.length - 1;
+              const useTyping =
+                isLastAssistant && (loading || displayedChars < m.content.length);
+              const showContent = useTyping
+                ? m.content.slice(0, displayedChars)
+                : m.content;
+
+              return (
+                <div
+                  key={i}
+                  className={`mb-4 flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  {m.role === "user" ? (
                     <div
-                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium text-white sm:h-9 sm:w-9"
-                      style={{ backgroundColor: GOLD }}
+                      className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-white"
+                      style={{
+                        background: "linear-gradient(135deg, #1B3A5C, #162F4A)",
+                      }}
                     >
-                      🐪
+                      <p className="whitespace-pre-wrap text-sm">{m.content}</p>
                     </div>
-                    <div className="rounded-2xl rounded-bl-md border border-[#E5E7EB] bg-white px-4 py-2.5 shadow-sm">
-                      <p
-                        className="mb-1 text-[11px] font-medium"
-                        style={{ color: GOLD }}
-                      >
-                        🐪 丝路通顾问
-                      </p>
-                      <div className="prose prose-sm max-w-none text-gray-800 prose-p:my-1 prose-ul:my-2 prose-li:my-0">
-                        <ReactMarkdown>{m.content || "..."}</ReactMarkdown>
+                  ) : (
+                    <div className="flex max-w-[85%] flex-col gap-2 sm:gap-3">
+                      <div className="flex gap-2 sm:gap-3">
+                        <div
+                          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium text-white sm:h-9 sm:w-9"
+                          style={{ backgroundColor: GOLD }}
+                        >
+                          🐪
+                        </div>
+                        <div className="rounded-2xl rounded-bl-md border border-[#E5E7EB] bg-white px-4 py-2.5 shadow-sm">
+                          <p
+                            className="mb-1 text-[11px] font-medium"
+                            style={{ color: GOLD }}
+                          >
+                            🐪 小丝
+                          </p>
+                          <div
+                            className="prose prose-sm max-w-none text-gray-800 prose-p:my-1 prose-ul:my-2 prose-li:my-0 overflow-y-auto"
+                            style={{ minHeight: 48, maxHeight: 280 }}
+                          >
+                            <ReactMarkdown>
+                              {showContent || (loading ? "..." : "")}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
                       </div>
+                      {m.role === "assistant" &&
+                        !loading &&
+                        showContent.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setShowContact(true)}
+                            className="self-start rounded-lg border border-[#C5A55A]/50 bg-[#FDFBF7] px-3 py-1.5 text-left text-xs text-[#1B3A5C] hover:bg-[#F5F0E8]"
+                          >
+                            {getTipForAssistantIndex(assistantCount - 1)}
+                          </button>
+                        )}
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
 
             {loading &&
               messages[messages.length - 1]?.role === "assistant" &&
               messages[messages.length - 1]?.content === "" && (
                 <div className="mb-4 flex justify-start">
-                  <div className="rounded-2xl rounded-bl-md border border-[#E5E7EB] bg-white px-4 py-2.5">
-                    <span className="text-[#6B7280]">正在回复...</span>
+                  <div
+                    className="rounded-2xl rounded-bl-md border border-[#E5E7EB] bg-white px-4 py-2.5"
+                    style={{ minHeight: 48 }}
+                  >
+                    <span className="text-[#6B7280]">小丝正在想...</span>
                   </div>
                 </div>
               )}
@@ -209,17 +288,27 @@ export default function ChatPage() {
           </div>
         )}
 
-        <div className="border-t border-[#E5E7EB] bg-white px-4 py-4">
+        <div
+          className="fixed bottom-0 left-0 right-0 z-10 border-t-2 border-[#E5E7EB] bg-[#F9F7F4] px-4 py-3"
+          style={{ boxShadow: "0 -2px 12px rgba(0,0,0,0.06)" }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowContact(true)}
+            className="mx-auto mb-2 flex w-full max-w-3xl items-center justify-center gap-2 rounded-lg border border-[#C5A55A]/40 bg-white/80 py-2 text-sm text-[#1B3A5C] hover:bg-[#F5F0E8]"
+          >
+            需要专家帮助？联系我们
+          </button>
           <div className="mx-auto max-w-3xl">
-            <form onSubmit={handleSubmit} className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex gap-3">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="问我任何中东商务文化问题..."
-                rows={2}
+                placeholder="问我任何中东商务文化问题…"
+                rows={3}
                 disabled={loading}
-                className="min-w-0 flex-1 rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm placeholder:text-[#6B7280] focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 disabled:bg-gray-50"
+                className="min-h-[88px] min-w-0 flex-1 rounded-xl border-2 border-[#E5E7EB] bg-white px-4 py-3 text-base placeholder:text-[#6B7280] focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 disabled:bg-gray-50"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -230,10 +319,10 @@ export default function ChatPage() {
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="flex-shrink-0 self-end rounded-xl px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="flex h-[88px] flex-shrink-0 items-center justify-center self-end rounded-xl px-6 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                 style={{
                   backgroundColor: GOLD,
-                  boxShadow: "0 2px 8px rgba(197,165,90,0.3)",
+                  boxShadow: "0 4px 12px rgba(197,165,90,0.4)",
                 }}
               >
                 发送
@@ -243,6 +332,7 @@ export default function ChatPage() {
         </div>
       </main>
 
+      <ContactModal show={showContact} onClose={() => setShowContact(false)} />
       <Footer />
     </div>
   );
