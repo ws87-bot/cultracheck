@@ -122,7 +122,7 @@ export async function chat(
 
   const stream = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 512,
+    max_tokens: 1024,
     stream: true,
     system: systemContent,
     messages: apiMessages,

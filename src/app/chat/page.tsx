@@ -66,6 +66,7 @@ export default function ChatPage() {
     (loading || displayedChars < lastAssistantCapped.length);
 
   useEffect(() => {
+    if (messages.length === 0) return;
     const el = scrollContainerRef.current;
     if (el) {
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
@@ -154,17 +155,23 @@ export default function ChatPage() {
 
   let assistantCount = 0;
 
+  const hasMessages = messages.length > 0;
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white text-[#1B3A5C]">
+    <div className="flex min-h-screen flex-col bg-white text-[#1B3A5C]">
       <Nav active="chat" />
 
-      <main className="flex min-h-0 flex-1 flex-col">
+      <main className="flex flex-1 flex-col">
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto px-4 py-6 sm:px-6"
-          style={{ height: "calc(100vh - 200px)", overflowY: "auto" }}
+          className="overflow-x-hidden px-4 py-6 sm:px-6"
+          style={
+            hasMessages
+              ? { maxHeight: "calc(100vh - 200px)", overflowY: "auto" }
+              : undefined
+          }
         >
-          <div className="mx-auto max-w-3xl pb-40">
+          <div className={`mx-auto max-w-3xl ${hasMessages ? "pb-4" : ""}`}>
             {messages.length === 0 && (
               <div className="hero-with-pattern rounded-2xl px-6 py-12 text-center sm:px-10 sm:py-16">
                 <p
@@ -289,7 +296,7 @@ export default function ChatPage() {
         )}
 
         <div
-          className="fixed bottom-0 left-0 right-0 z-10 border-t-2 border-[#E5E7EB] bg-[#F9F7F4] px-4 py-3"
+          className="border-t-2 border-[#E5E7EB] bg-[#F9F7F4] px-4 py-3"
           style={{ boxShadow: "0 -2px 12px rgba(0,0,0,0.06)" }}
         >
           <button
