@@ -42,17 +42,14 @@ export default function Nav({ active }: NavProps) {
         </Link>
         <Link
           href="/chat"
-          className="nav-chat-btn flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-[20px] px-2 py-1.5 text-xs font-medium transition-colors sm:min-h-0 sm:min-w-0 sm:px-4 sm:text-sm"
+          className={`min-h-[44px] min-w-[44px] px-2 py-1.5 text-xs font-medium transition-opacity hover:opacity-90 sm:min-h-0 sm:min-w-0 sm:px-4 sm:py-1.5 sm:text-sm ${
+            active === "chat" ? "" : "text-white/80"
+          }`}
           style={{
-            background: active === "chat" ? "rgba(197,160,84,0.25)" : "rgba(197,160,84,0.15)",
-            border: "1px solid rgba(197,160,84,0.3)",
-            color: GOLD,
+            color: active === "chat" ? GOLD : undefined,
+            borderBottom: active === "chat" ? "2px solid #C5A054" : "2px solid transparent",
           }}
         >
-          <span
-            className="nav-online-dot h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#00A86B]"
-            title="在线"
-          />
           💬 文化顾问
         </Link>
       </nav>

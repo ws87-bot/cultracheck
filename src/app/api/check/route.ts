@@ -5,18 +5,14 @@ import { NextRequest, NextResponse } from "next/server";
 const MAX_TEXT_LENGTH = 10000;
 
 /**
- * POST /api/check — 文案/内容合规审核
- * 请求体：{ text: string, targetCountry?: string, contentType?: string }
+ * POST /api/check — 文案/内容合规审核（极简：仅 text，目标市场由 AI 自动识别）
+ * 请求体：{ text: string }
  * 返回：审核报告 JSON
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { text, targetCountry, contentType } = body as {
-      text?: string;
-      targetCountry?: string;
-      contentType?: string;
-    };
+    const { text } = body as { text?: string };
 
     if (text == null || typeof text !== "string") {
       return NextResponse.json(
@@ -40,11 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await checkContent(
-      trimmed,
-      targetCountry,
-      contentType
-    );
+    const result = await checkContent(trimmed);
 
     return NextResponse.json(result);
   } catch (error) {

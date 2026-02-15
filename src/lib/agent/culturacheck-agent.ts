@@ -54,15 +54,20 @@ function parseCheckResponse(raw: string): CheckReport {
   return JSON.parse(repaired) as CheckReport;
 }
 
+/** 未指定目标市场时：要求 AI 先分析文案中的国家/城市/人名，再按对应规则审核，并在 summary 中说明判断的目标市场 */
+const AUTO_MARKET_SYSTEM_APPEND = `
+
+【重要】请先分析用户文案中是否提及了具体的中东国家、城市或人名。如果提到了（如迪拜、利雅得、多哈等），则按该国的文化规则进行审核。如果未提及具体国家，则按海湾六国中最严格的通用标准进行审核（宁可多提醒，不漏掉）。在审核结果的 summary 中说明你判断的目标市场是哪里。`;
+
 /**
  * 1. 文案/内容审核：搜索知识库 → 发给 Claude → 返回结构化 JSON 审核报告
+ * 不传 targetCountry/contentType 时，由 AI 根据文案自动识别目标市场并在 summary 中说明。
  */
 export async function checkContent(
   text: string,
   targetCountry?: string,
   contentType?: string
 ): Promise<CheckReport> {
-  // 用用户文本 + 目标国家/类型做知识库检索（限制条数避免 prompt 过长）
   const searchResults = searchKnowledge(text, {
     country: targetCountry,
     limit: 15,
@@ -78,13 +83,16 @@ export async function checkContent(
           .join("\n")}`
       : "";
 
-  const userPrompt = `待审核内容${targetCountry ? `（目标市场：${targetCountry}）` : ""}${contentType ? `（类型：${contentType}）` : ""}：\n\n${text}${rulesSection}`;
+  const userPrompt = targetCountry || contentType
+    ? `待审核内容${targetCountry ? `（目标市场：${targetCountry}）` : ""}${contentType ? `（类型：${contentType}）` : ""}：\n\n${text}${rulesSection}`
+    : `待审核内容：\n\n${text}${rulesSection}`;
 
+  const systemAppend = !targetCountry ? AUTO_MARKET_SYSTEM_APPEND : "";
   const message = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 4096,
     temperature: 0,
-    system: `${SYSTEM_PROMPT}\n\n${CHECK_PROMPT}`,
+    system: `${SYSTEM_PROMPT}\n\n${CHECK_PROMPT}${systemAppend}`,
     messages: [{ role: "user", content: userPrompt }],
   });
 

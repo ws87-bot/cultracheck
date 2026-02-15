@@ -15,7 +15,7 @@ export default function ResultDisplay({
   result,
   onContactClick,
 }: {
-  result: CheckReport;
+  result: CheckReport & { truncated?: boolean };
   onContactClick: () => void;
 }) {
   const [revisedOpen, setRevisedOpen] = useState(false);
@@ -46,6 +46,19 @@ export default function ResultDisplay({
   return (
     <section className="border-b border-[#E8E3DA] bg-[#FAF3E8] px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-[720px] space-y-8">
+        {result.truncated && (
+          <p
+            className="text-[12px]"
+            style={{
+              color: "#C5A054",
+              backgroundColor: "rgba(197,160,84,0.08)",
+              borderRadius: 8,
+              padding: "8px 14px",
+            }}
+          >
+            📄 文件内容较长，已分析前 5000 字。如需完整分析，请分段提交。
+          </p>
+        )}
         {/* 评分卡 */}
         <div
           className="rounded-[18px] border p-6"

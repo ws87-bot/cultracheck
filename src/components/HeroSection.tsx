@@ -39,35 +39,12 @@ export default function HeroSection() {
             智能扫描你的文案、邮件、方案书中的中东文化雷区
           </p>
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <span
-            className="rounded-[20px] border px-4 py-1.5 text-xs text-white backdrop-blur-[8px]"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.06)",
-              borderColor: "rgba(197,160,84,0.25)",
-            }}
-          >
-            📚 2400+条文化规则
-          </span>
-          <span
-            className="rounded-[20px] border px-4 py-1.5 text-xs text-white backdrop-blur-[8px]"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.06)",
-              borderColor: "rgba(197,160,84,0.25)",
-            }}
-          >
-            🌍 覆盖海湾七国
-          </span>
-          <span
-            className="rounded-[20px] border px-4 py-1.5 text-xs text-white backdrop-blur-[8px]"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.06)",
-              borderColor: "rgba(197,160,84,0.25)",
-            }}
-          >
-            🐪 丝路商务实战经验
-          </span>
-        </div>
+        <p
+          className="text-center"
+          style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", letterSpacing: 1 }}
+        >
+          覆盖沙特 · 阿联酋 · 卡塔尔 · 科威特 · 阿曼 · 巴林 · 埃及
+        </p>
       </div>
       <div
         className="absolute bottom-0 left-0 right-0 h-[30px]"
