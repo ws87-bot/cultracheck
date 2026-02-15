@@ -6,8 +6,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 
-const GOLD = "#C5A55A";
-const MAX_REPLY_CHARS = 300;
+const GOLD = "#C5A054";
 const TYPING_SPEED_MS = 35;
 const TYPING_CHUNK = 2;
 
@@ -59,11 +58,10 @@ export default function ChatPage() {
 
   const lastAssistantContent =
     messages.filter((m) => m.role === "assistant").pop()?.content ?? "";
-  const lastAssistantCapped = lastAssistantContent.slice(0, MAX_REPLY_CHARS);
   const isLastAssistantStreaming =
     messages.length > 0 &&
     messages[messages.length - 1].role === "assistant" &&
-    (loading || displayedChars < lastAssistantCapped.length);
+    (loading || displayedChars < lastAssistantContent.length);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -74,8 +72,8 @@ export default function ChatPage() {
   }, [messages, displayedChars]);
 
   useEffect(() => {
-    if (!isLastAssistantStreaming || displayedChars >= lastAssistantCapped.length) return;
-    const target = lastAssistantCapped.length;
+    if (!isLastAssistantStreaming || displayedChars >= lastAssistantContent.length) return;
+    const target = lastAssistantContent.length;
     const timer = setInterval(() => {
       setDisplayedChars((prev) => {
         const next = Math.min(prev + TYPING_CHUNK, target);
@@ -83,7 +81,7 @@ export default function ChatPage() {
       });
     }, TYPING_SPEED_MS);
     return () => clearInterval(timer);
-  }, [lastAssistantCapped.length, isLastAssistantStreaming, displayedChars]);
+  }, [lastAssistantContent.length, isLastAssistantStreaming, displayedChars]);
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
@@ -122,15 +120,15 @@ export default function ChatPage() {
         const { done, value } = await reader.read();
         if (done) break;
         full += decoder.decode(value, { stream: true });
-        const capped = full.slice(0, MAX_REPLY_CHARS);
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
-          if (last?.role === "assistant") next[next.length - 1] = { ...last, content: capped };
+          if (last?.role === "assistant") next[next.length - 1] = { ...last, content: full };
           return next;
         });
+        setDisplayedChars(full.length);
       }
-      setDisplayedChars(Math.min(full.length, MAX_REPLY_CHARS));
+      setDisplayedChars(full.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : "对话失败");
       setMessages((prev) => prev.slice(0, -1));
@@ -158,7 +156,7 @@ export default function ChatPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-[#1B3A5C]">
+    <div className="flex min-h-screen flex-col text-[#1A1D21]" style={{ backgroundColor: "#FAF3E8" }}>
       <Nav active="chat" />
 
       <main className="flex flex-1 flex-col">
@@ -173,10 +171,10 @@ export default function ChatPage() {
         >
           <div className={`mx-auto max-w-3xl ${hasMessages ? "pb-4" : ""}`}>
             {messages.length === 0 && (
-              <div className="hero-with-pattern rounded-2xl px-6 py-12 text-center sm:px-10 sm:py-16">
+              <div className="hero-with-pattern rounded-2xl px-4 py-8 text-center sm:px-10 sm:py-16">
                 <p
-                  className="text-xs tracking-widest text-[#C5A55A]"
-                  style={{ letterSpacing: 4 }}
+                  className="text-xs tracking-widest"
+                  style={{ letterSpacing: 4, color: "#C5A054" }}
                 >
                   ✦ 丝路通 SILKPASS ✦
                 </p>
@@ -186,18 +184,18 @@ export default function ChatPage() {
                 <p className="mt-2 text-white/90">
                   出差前 · 签约前 · 发布前，有问题直接问我
                 </p>
-                <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="mt-8 grid grid-cols-2 gap-2 sm:mt-10 sm:gap-4">
                   {SCENARIO_CARDS.map((card) => (
                     <button
                       key={card.title}
                       type="button"
                       onClick={() => handleScenarioCard(card.question)}
-                      className="flex items-start gap-3 rounded-2xl border-2 border-transparent bg-white p-4 text-left shadow-sm transition-all hover:border-[#C5A55A] hover:shadow-md hover:-translate-y-0.5"
+                      className="flex min-h-[44px] min-w-0 items-start gap-2 rounded-[14px] border-2 border-transparent bg-[#FFFBF5] p-3 text-left shadow-sm transition-all hover:border-[#C5A054] hover:shadow-md hover:-translate-y-0.5 sm:gap-3 sm:p-4"
                     >
-                      <span className="text-2xl">{card.icon}</span>
+                      <span className="flex-shrink-0 text-xl sm:text-2xl">{card.icon}</span>
                       <div className="min-w-0 flex-1">
-                        <span className="font-medium text-gray-900">{card.title}</span>
-                        <p className="mt-0.5 text-sm text-[#6B7280]">{card.desc}</p>
+                        <span className="text-sm font-medium text-[#1A1D21] sm:text-base">{card.title}</span>
+                        <p className="mt-0.5 text-xs text-[#3D4450] sm:text-sm">{card.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -224,7 +222,7 @@ export default function ChatPage() {
                     <div
                       className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-white"
                       style={{
-                        background: "linear-gradient(135deg, #1B3A5C, #162F4A)",
+                        background: "linear-gradient(135deg, #006B3F, #004D2C)",
                       }}
                     >
                       <p className="whitespace-pre-wrap text-sm">{m.content}</p>
@@ -238,15 +236,15 @@ export default function ChatPage() {
                         >
                           🐪
                         </div>
-                        <div className="rounded-2xl rounded-bl-md border border-[#E5E7EB] bg-white px-4 py-2.5 shadow-sm">
+                        <div className="rounded-2xl rounded-bl-md border px-4 py-2.5 shadow-sm" style={{ borderColor: "#E8E3DA", backgroundColor: "#FFFBF5" }}>
                           <p
-                            className="mb-1 text-[11px] font-medium"
+                            className="mb-1 text-[10px] font-medium"
                             style={{ color: GOLD }}
                           >
-                            🐪 小丝
+                            🐪 丝路通顾问
                           </p>
                           <div
-                            className="prose prose-sm max-w-none text-gray-800 prose-p:my-1 prose-ul:my-2 prose-li:my-0 overflow-y-auto"
+                            className="prose prose-sm max-w-none text-[#1A1D21] prose-p:my-1 prose-ul:my-2 prose-li:my-0 overflow-y-auto"
                             style={{ minHeight: 48, maxHeight: 280 }}
                           >
                             <ReactMarkdown>
@@ -261,7 +259,8 @@ export default function ChatPage() {
                           <button
                             type="button"
                             onClick={() => setShowContact(true)}
-                            className="self-start rounded-lg border border-[#C5A55A]/50 bg-[#FDFBF7] px-3 py-1.5 text-left text-xs text-[#1B3A5C] hover:bg-[#F5F0E8]"
+                            className="self-start rounded-lg border px-3 py-1.5 text-left text-xs text-[#1A1D21] hover:opacity-90"
+                            style={{ borderColor: "rgba(197,160,84,0.5)", backgroundColor: "#FFFBF5" }}
                           >
                             {getTipForAssistantIndex(assistantCount - 1)}
                           </button>
@@ -277,10 +276,10 @@ export default function ChatPage() {
               messages[messages.length - 1]?.content === "" && (
                 <div className="mb-4 flex justify-start">
                   <div
-                    className="rounded-2xl rounded-bl-md border border-[#E5E7EB] bg-white px-4 py-2.5"
-                    style={{ minHeight: 48 }}
+                    className="rounded-2xl rounded-bl-md border px-4 py-2.5"
+                    style={{ minHeight: 48, borderColor: "#E8E3DA", backgroundColor: "#FFFBF5" }}
                   >
-                    <span className="text-[#6B7280]">小丝正在想...</span>
+                    <span className="text-[#8B919A]">丝路通顾问正在想...</span>
                   </div>
                 </div>
               )}
@@ -290,24 +289,30 @@ export default function ChatPage() {
         </div>
 
         {error && (
-          <div className="px-4 py-2 text-center text-sm text-[#DC2626]" role="alert">
+          <div className="px-4 py-2 text-center text-sm text-[#C41E3A]" role="alert">
             {error}
           </div>
         )}
 
         <div
-          className="border-t-2 border-[#E5E7EB] bg-[#F9F7F4] px-4 py-3"
-          style={{ boxShadow: "0 -2px 12px rgba(0,0,0,0.06)" }}
+          className="border-t-2 px-3 py-3 sm:px-4"
+          style={{
+            borderColor: "#E8E3DA",
+            backgroundColor: "#FAF3E8",
+            boxShadow: "0 -2px 12px rgba(0,0,0,0.04)",
+            paddingBottom: "max(16px, env(safe-area-inset-bottom))",
+          }}
         >
           <button
             type="button"
             onClick={() => setShowContact(true)}
-            className="mx-auto mb-2 flex w-full max-w-3xl items-center justify-center gap-2 rounded-lg border border-[#C5A55A]/40 bg-white/80 py-2 text-sm text-[#1B3A5C] hover:bg-[#F5F0E8]"
+            className="mx-auto mb-2 flex min-h-[44px] w-full max-w-3xl items-center justify-center gap-2 rounded-lg border py-2 text-sm text-[#1A1D21] hover:opacity-90"
+            style={{ borderColor: "rgba(197,160,84,0.4)", backgroundColor: "rgba(255,251,245,0.9)" }}
           >
             需要专家帮助？联系我们
           </button>
           <div className="mx-auto max-w-3xl">
-            <form onSubmit={handleSubmit} className="flex gap-3">
+            <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -315,7 +320,7 @@ export default function ChatPage() {
                 placeholder="问我任何中东商务文化问题…"
                 rows={3}
                 disabled={loading}
-                className="min-h-[88px] min-w-0 flex-1 rounded-xl border-2 border-[#E5E7EB] bg-white px-4 py-3 text-base placeholder:text-[#6B7280] focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30 disabled:bg-gray-50"
+                className="min-h-[88px] min-w-0 flex-1 rounded-xl border-2 border-[#E8E3DA] bg-[#FFFBF5] px-4 py-3 text-base text-[#1A1D21] placeholder:text-[#8B919A] focus:border-[#006B3F] focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20 disabled:bg-[#E8E3DA]/50"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -326,10 +331,10 @@ export default function ChatPage() {
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="flex h-[88px] flex-shrink-0 items-center justify-center self-end rounded-xl px-6 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="flex min-h-[44px] h-[88px] flex-shrink-0 items-center justify-center self-end rounded-xl px-4 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-70 sm:px-6"
                 style={{
-                  backgroundColor: GOLD,
-                  boxShadow: "0 4px 12px rgba(197,165,90,0.4)",
+                  background: loading || !input.trim() ? "#D1CBC0" : "linear-gradient(135deg, #006B3F, #004D2C)",
+                  boxShadow: loading || !input.trim() ? "none" : "0 4px 12px rgba(0,107,63,0.35)",
                 }}
               >
                 发送

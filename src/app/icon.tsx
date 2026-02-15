@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
-/** 丝路通 SilkPass 品牌图标：深蓝底 + 金色 S */
+/** 丝路通 SilkPass 品牌图标：翡翠绿底 + 金色 S */
 export default function Icon() {
   return new ImageResponse(
     (
@@ -14,8 +14,8 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#1B3A5C",
-          color: "#C5A55A",
+          background: "#004D2C",
+          color: "#C5A054",
           fontSize: 20,
           fontWeight: 700,
           fontFamily: "system-ui, sans-serif",

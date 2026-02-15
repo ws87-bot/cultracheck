@@ -77,7 +77,8 @@ export default function ContactModal({
       aria-modal="true"
     >
       <div
-        className="contact-modal-card w-full max-w-[420px] overflow-hidden rounded-[20px] bg-white shadow-xl"
+        className="contact-modal-card w-full max-w-[420px] overflow-hidden rounded-[20px] shadow-xl"
+        style={{ backgroundColor: "#FFFBF5" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="hero-with-pattern relative rounded-t-[20px] px-6 py-6">
@@ -97,16 +98,22 @@ export default function ContactModal({
 
         {formSubmitted ? (
           <div className="flex flex-col items-center px-6 py-10">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#16A34A]/20 text-3xl text-[#16A34A]">
+            <div
+              className="mb-4 flex h-14 w-14 items-center justify-center rounded-full text-3xl"
+              style={{ backgroundColor: "rgba(0,168,107,0.2)", color: "#00A86B" }}
+            >
               ✓
             </div>
-            <p className="text-lg font-bold text-gray-900">已收到您的咨询</p>
-            <p className="mt-1 text-sm text-gray-500">我们会尽快联系您</p>
+            <p className="text-lg font-bold text-[#1A1D21]">已收到您的咨询</p>
+            <p className="mt-1 text-sm text-[#3D4450]">我们会尽快联系您</p>
             <button
               type="button"
               onClick={handleClose}
               className="mt-6 rounded-xl px-6 py-2.5 text-sm font-medium text-white"
-              style={{ background: "linear-gradient(135deg, #C5A55A, #A8893A)" }}
+              style={{
+                background: "linear-gradient(135deg, #006B3F, #004D2C)",
+                boxShadow: "0 4px 12px rgba(0,107,63,0.3)",
+              }}
             >
               关闭
             </button>
@@ -118,26 +125,26 @@ export default function ContactModal({
               placeholder="您的姓名"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="mb-3 w-full rounded-[10px] border border-[#E5E7EB] px-3 py-2.5 text-sm focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+              className="mb-3 w-full rounded-[10px] border border-[#E8E3DA] bg-[#FFFBF5] px-3 py-2.5 text-sm text-[#1A1D21] placeholder:text-[#8B919A] focus:border-[#006B3F] focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20"
             />
             <input
               type="text"
               placeholder="公司名称"
               value={formData.company}
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              className="mb-3 w-full rounded-[10px] border border-[#E5E7EB] px-3 py-2.5 text-sm focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+              className="mb-3 w-full rounded-[10px] border border-[#E8E3DA] bg-[#FFFBF5] px-3 py-2.5 text-sm text-[#1A1D21] placeholder:text-[#8B919A] focus:border-[#006B3F] focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20"
             />
             <input
               type="text"
               placeholder="手机号或邮箱"
               value={formData.contact}
               onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-              className="mb-3 w-full rounded-[10px] border border-[#E5E7EB] px-3 py-2.5 text-sm focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+              className="mb-3 w-full rounded-[10px] border border-[#E8E3DA] bg-[#FFFBF5] px-3 py-2.5 text-sm text-[#1A1D21] placeholder:text-[#8B919A] focus:border-[#006B3F] focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20"
             />
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              className="mb-3 w-full rounded-[10px] border border-[#E5E7EB] px-3 py-2.5 text-sm focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+              className="mb-3 w-full rounded-[10px] border border-[#E8E3DA] bg-[#FFFBF5] px-3 py-2.5 text-sm text-[#1A1D21] focus:border-[#006B3F] focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20"
             >
               <option value="文化培训">文化培训</option>
               <option value="出海咨询">出海咨询</option>
@@ -149,12 +156,15 @@ export default function ContactModal({
               rows={3}
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="mb-4 w-full rounded-[10px] border border-[#E5E7EB] px-3 py-2.5 text-sm focus:border-[#C5A55A] focus:outline-none focus:ring-2 focus:ring-[#C5A55A]/30"
+              className="mb-4 w-full rounded-[10px] border border-[#E8E3DA] bg-[#FFFBF5] px-3 py-2.5 text-sm text-[#1A1D21] placeholder:text-[#8B919A] focus:border-[#006B3F] focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20"
             />
             <button
               type="submit"
               className="w-full rounded-xl py-3 text-sm font-medium text-white"
-              style={{ background: "linear-gradient(135deg, #C5A55A, #A8893A)" }}
+              style={{
+                background: "linear-gradient(135deg, #006B3F, #004D2C)",
+                boxShadow: "0 4px 12px rgba(0,107,63,0.3)",
+              }}
             >
               提交咨询
             </button>

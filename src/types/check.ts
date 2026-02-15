@@ -15,11 +15,11 @@ export interface CheckReport {
   cultureTips: string;
 }
 
-export const DANGER = "#DC2626";
-export const WARNING = "#E8890C";
-export const SAFE = "#16A34A";
-export const EXCELLENT = "#047857";
-export const GOLD = "#C5A55A";
+export const DANGER = "#C41E3A";
+export const WARNING = "#E6A817";
+export const SAFE = "#00A86B";
+export const EXCELLENT = "#006B3F";
+export const GOLD = "#C5A054";
 
 export const COUNTRIES = [
   "阿拉伯世界通用",

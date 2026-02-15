@@ -1,49 +1,63 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #1B3A5C;
-  --navy: #1B3A5C;
-  --navy-dark: #0F2440;
-  --gold: #C5A55A;
-  --gold-dark: #A8893A;
-  --danger: #DC2626;
-  --warning: #E8890C;
-  --safe: #16A34A;
-  --excellent: #047857;
-  --muted: #6B7280;
-  --border: #E5E7EB;
+  --emerald: #006B3F;
+  --emerald-dark: #004D2C;
+  --emerald-deep: #00331D;
+  --gold: #C5A054;
+  --gold-light: #D4B76A;
+  --sand: #FAF3E8;
+  --cream: #FFFBF5;
+  --charcoal: #1A1D21;
+  --slate: #3D4450;
+  --silver: #8B919A;
+  --border: #E8E3DA;
+  --danger: #C41E3A;
+  --warning: #E6A817;
+  --safe: #00A86B;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--sand);
+  --color-foreground: var(--charcoal);
+  --font-sans: "Noto Sans SC", sans-serif;
+  --font-mono: ui-monospace, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  background: #FAF3E8;
+  color: #1A1D21;
+  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* 阿拉伯几何纹样：金色八角星 SVG 重复 */
+/* 移动端可点击元素最小触控区域 44x44px */
+@media (max-width: 640px) {
+  button:not(.min-touch-exempt),
+  a:not(.min-touch-exempt),
+  [role="button"]:not(.min-touch-exempt) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* 八角星纹样：金色 stroke 0.6 opacity 0.05 */
 .arabic-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 15L45 15L37 22L40 32L30 26L20 32L23 22L15 15L25 15Z' fill='none' stroke='%23C5A55A' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 15L45 15L37 22L40 32L30 26L20 32L23 22L15 15L25 15Z' fill='none' stroke='%23C5A054' stroke-width='0.6' opacity='0.05'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
 }
 
-/* Hero 用：深蓝渐变 + 阿拉伯纹样叠加 */
+/* Hero / 深色区：翡翠绿渐变 + 八角星纹样 */
 .hero-with-pattern {
-  background-color: var(--navy);
+  background-color: #00331D;
   background-image:
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 15L45 15L37 22L40 32L30 26L20 32L23 22L15 15L25 15Z' fill='none' stroke='%23C5A55A' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E"),
-    linear-gradient(180deg, #1B3A5C 0%, #162F4A 100%);
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 15L45 15L37 22L40 32L30 26L20 32L23 22L15 15L25 15Z' fill='none' stroke='%23C5A054' stroke-width='0.6' opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(160deg, #00331D 0%, #004D2C 40%, #006B3F 100%);
   background-size: 60px 60px, 100% 100%;
   background-position: 0 0, 0 0;
 }
 
-/* 扫描进度条：30s 内 0% → 95% */
+/* 扫描进度条 */
 @keyframes progressBar {
   0% { width: 0%; }
   20% { width: 30%; }
@@ -55,7 +69,6 @@ body {
   animation: progressBar 30s ease-out forwards;
 }
 
-/* 导航栏「在线」绿点闪烁 */
 @keyframes nav-online-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -64,19 +77,13 @@ body {
   animation: nav-online-blink 1.5s ease-in-out infinite;
 }
 
-/* 导航栏「文化顾问」按钮 hover */
 .nav-chat-btn:hover {
-  background: rgba(197, 165, 90, 0.25) !important;
+  background: rgba(197, 160, 84, 0.25) !important;
 }
 
-/* 咨询弹窗淡入 */
 @keyframes modal-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .contact-modal-overlay {
   animation: modal-fade-in 0.2s ease-out;
