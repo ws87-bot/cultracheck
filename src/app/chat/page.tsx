@@ -204,7 +204,7 @@ export default function ChatPage() {
                   type="button"
                   onClick={() =>
                     handleScenarioCard(
-                      "请给我一份中东商务禁忌速查表，按严重程度分级：🔴一律禁忌（绝对不能碰）、🟡普通禁忌（容易踩雷要注意）、🟢文化加分（做了会加分）。每个级别列出关键条目，简洁明了。"
+                      "请给我一份中东商务禁忌速查表，按严重程度分级：🔴重要禁忌（绝对不能碰）、🟡普通禁忌（容易踩雷要注意）、🟢文化加分（做了会加分）。每个级别列出关键条目，简洁明了。"
                     )
                   }
                   className="mt-3 flex w-full items-center justify-between rounded-2xl border px-6 py-4 text-left transition-all hover:-translate-y-0.5 sm:px-6"
@@ -230,7 +230,7 @@ export default function ChatPage() {
                       className="mt-0.5 text-white/70"
                       style={{ fontSize: 13 }}
                     >
-                      一律禁忌 · 普通禁忌 · 文化加分 — 出发前5分钟速看
+                      重要禁忌 · 普通禁忌 · 文化加分 — 出发前5分钟速看
                     </p>
                   </div>
                   <span className="flex-shrink-0 text-white" aria-hidden>→</span>
