@@ -154,9 +154,37 @@ export async function POST(request: NextRequest) {
       if (ext === ".txt") {
         text = await file.text();
       } else if (ext === ".pdf") {
-        const pdfParse = (await import("pdf-parse")).default;
-        const data = await pdfParse(buffer);
-        text = (data?.text || "").trim();
+        const base64 = buffer.toString("base64");
+        const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const message = await anthropic.messages.create({
+          model: "claude-sonnet-4-5-20250929",
+          max_tokens: 4096,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "document",
+                  source: {
+                    type: "base64",
+                    media_type: "application/pdf",
+                    data: base64,
+                  },
+                },
+                {
+                  type: "text",
+                  text: "请提取这个PDF中的所有文字内容，只返回纯文字，不要加任何解释或格式。",
+                },
+              ],
+            },
+          ],
+        });
+        const textBlock = message.content.find((b) => b.type === "text");
+        text =
+          textBlock && "text" in textBlock
+            ? (textBlock as { text: string }).text
+            : "";
+        text = text.trim();
       } else if (ext === ".docx") {
         const result = await mammoth.extractRawText({ buffer });
         text = (result.value || "").trim();
