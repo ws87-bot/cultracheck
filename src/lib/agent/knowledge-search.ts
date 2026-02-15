@@ -41,26 +41,31 @@ const STOPWORDS = new Set([
 ]);
 
 /**
- * 中文分词：先按标点拆成片段，再对每个片段生成 2–4 字 n-gram，并过滤停用词
+ * 分词：英文单词整体保留，中文按 2–4 字 n-gram 切分并过滤停用词
  */
 function tokenize(text: string): string[] {
   if (!text || typeof text !== "string") return [];
   const normalized = text.replace(/\s+/g, " ").trim();
-  const fragments = normalized
-    .split(/[\s，。！？、；：""''（）【】\-—,.;:!?]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length >= 2);
-
   const seen = new Set<string>();
-  for (const frag of fragments) {
-    for (let len = 2; len <= 4 && len <= frag.length; len++) {
-      for (let i = 0; i <= frag.length - len; i++) {
-        const ngram = frag.slice(i, i + len);
-        if (STOPWORDS.has(ngram)) continue;
-        seen.add(ngram);
+
+  // 1. 完整英文单词（2+ 字母）直接加入，不切 n-gram
+  const enWords = normalized.match(/[A-Za-z]{2,}/g);
+  if (enWords) for (const w of enWords) seen.add(w);
+
+  // 2. 连续中文片段（2+ 字）做 2–4 字 n-gram
+  const zhSegments = normalized.match(/[\u4e00-\u9fff]{2,}/g);
+  if (zhSegments) {
+    for (const frag of zhSegments) {
+      for (let len = 2; len <= 4 && len <= frag.length; len++) {
+        for (let i = 0; i <= frag.length - len; i++) {
+          const ngram = frag.slice(i, i + len);
+          if (STOPWORDS.has(ngram)) continue;
+          seen.add(ngram);
+        }
       }
     }
   }
+
   return Array.from(seen);
 }
 
