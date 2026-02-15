@@ -69,6 +69,26 @@ function tokenize(text: string): string[] {
   return Array.from(seen);
 }
 
+/** 正则特殊字符转义，用于构造 \b word \b */
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** 判断 content 中是否包含 token 作为完整词（英文按边界） */
+function wholeWordInContent(content: string, token: string): boolean {
+  if (!content || !token) return false;
+  const re = new RegExp("\\b" + escapeRegex(token) + "\\b", "i");
+  return re.test(content);
+}
+
+/** 单 token 基础权重：英文词 x5，4 字 x3，3 字 x2，2 字 x1 */
+function tokenWeight(token: string): number {
+  if (/^[A-Za-z]{2,}$/.test(token)) return 5;
+  if (token.length === 4) return 3;
+  if (token.length === 3) return 2;
+  return 1;
+}
+
 /**
  * 在知识库中搜索与 query 相关的知识点
  * @param query 用户输入或待审核内容摘要
@@ -79,7 +99,7 @@ export function searchKnowledge(
   query: string,
   options?: { country?: string; category?: string; limit?: number }
 ): KnowledgeSearchResult[] {
-  const limit = options?.limit ?? 10;
+  const limit = options?.limit ?? 15;
   const country = options?.country;
   const category = options?.category;
 
@@ -105,19 +125,30 @@ export function searchKnowledge(
       (chunk.tags || []).join(" "),
     ].join(" ");
     const searchableLower = searchableText.toLowerCase();
+    const tagsSet = new Set((chunk.tags || []).map((t) => t.toLowerCase()));
 
-    let hitCount = 0;
+    let score = 0;
     for (const token of tokens) {
       if (token.length < 2) continue;
-      if (searchableLower.includes(token) || searchableText.includes(token)) {
-        hitCount += 1;
-      }
+      const inSearchable =
+        searchableLower.includes(token.toLowerCase()) ||
+        searchableText.includes(token);
+      if (!inSearchable) continue;
+
+      const tw = tokenWeight(token);
+      score += tw;
+
+      if (tagsSet.has(token.toLowerCase())) score += 3;
+      if (
+        /^[A-Za-z]{2,}$/.test(token) &&
+        wholeWordInContent(chunk.content, token)
+      )
+        score += tw;
     }
 
-    if (hitCount === 0) continue;
+    if (score === 0) continue;
 
-    const weight = SEVERITY_WEIGHT[chunk.severity] ?? 1;
-    const score = hitCount * weight;
+    score *= SEVERITY_WEIGHT[chunk.severity] ?? 1;
     results.push({ chunk, score });
   }
 
