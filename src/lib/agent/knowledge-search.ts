@@ -34,15 +34,34 @@ function getKnowledgeBase(): KnowledgeChunk[] {
   return knowledgeBase;
 }
 
+/** 中文停用词：这些词不参与匹配，过滤掉可减少噪音 */
+const STOPWORDS = new Set([
+  "的", "了", "在", "是", "和", "与", "对", "等", "也", "都", "就", "会", "到", "从", "把", "被", "让", "给", "向", "为",
+  "我们", "你们", "他们", "这个", "那个", "一个", "可以", "需要", "应该", "将在", "各种", "届时",
+]);
+
 /**
- * 简单中文分词：按标点、空格拆分为关键词列表（用于匹配）
+ * 中文分词：先按标点拆成片段，再对每个片段生成 2–4 字 n-gram，并过滤停用词
  */
 function tokenize(text: string): string[] {
   if (!text || typeof text !== "string") return [];
   const normalized = text.replace(/\s+/g, " ").trim();
-  return normalized
+  const fragments = normalized
     .split(/[\s，。！？、；：""''（）【】\-—,.;:!?]+/)
-    .filter((s) => s.length > 0);
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 2);
+
+  const seen = new Set<string>();
+  for (const frag of fragments) {
+    for (let len = 2; len <= 4 && len <= frag.length; len++) {
+      for (let i = 0; i <= frag.length - len; i++) {
+        const ngram = frag.slice(i, i + len);
+        if (STOPWORDS.has(ngram)) continue;
+        seen.add(ngram);
+      }
+    }
+  }
+  return Array.from(seen);
 }
 
 /**
