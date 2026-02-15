@@ -43,7 +43,7 @@ export default function HeroSection() {
           className="text-center"
           style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", letterSpacing: 1 }}
         >
-          覆盖沙特 · 阿联酋 · 卡塔尔 · 科威特 · 阿曼 · 巴林 · 埃及 ｜ 中英双语
+          覆盖沙特 · 阿联酋 · 卡塔尔 · 科威特 · 阿曼 · 巴林 · 埃及 ｜ 中英文内容均可扫描
         </p>
       </div>
       <div
