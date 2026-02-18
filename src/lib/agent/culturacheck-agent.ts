@@ -1,4 +1,4 @@
-npm uninstall pdf-parse && npm uninstall @types/pdf-parse 2>/dev/null; git add . && git commit -m "fix: remove capture=env, replace pdf-parse with Claude Vision" && git push/**
+/**
  * 丝路通 主 Agent：文案审核、对话、文档审核
  * 依赖：@anthropic-ai/sdk、jsonrepair、同目录 prompts / knowledge-search、dotenv
  */
