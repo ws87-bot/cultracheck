@@ -1,4 +1,4 @@
-const fs = require("fs");
+git add -A && git commit -m "feat: AI关键词提取优化知识库检索精度" && git pushconst fs = require("fs");
 const path = require("path");
 const mammoth = require("mammoth");
 const JSZip = require("jszip");

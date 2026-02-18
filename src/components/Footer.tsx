@@ -25,7 +25,7 @@ export default function Footer() {
         <p className="text-[11px] text-white/70">
           由石悦华老师领衔 · 曾任加拿大安省政府高级政策顾问、港股上市公司北美MD · 北大汇丰商学院（深圳）国际部外聘导师 · 横跨中国、北美、中东三大市场 · 累计服务上百家出海企业
         </p>
-        <p className="text-[10px] text-white/50">FalconBridge 旗下产品</p>
+        <p className="text-[10px] text-white/50">悦出海跨文化工作室出品</p>
       </div>
     </footer>
   );
